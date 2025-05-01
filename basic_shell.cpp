@@ -165,3 +165,32 @@ void cmd_quit() {
     cout << "Exiting Basic OS Shell..." << endl;
     exit(0);
 }
+
+
+//Command: cp
+void cmd_cp(const vector<string> &args) {
+
+}
+
+//Command: mv
+void cmd_mv(const vector<string> &args) {
+
+}
+
+//Command: rm
+void cmd_rm(const vector<string> &args) {
+    
+}
+
+//Command: touch
+void cmd_touch(const vector<string> &args) {
+    //if file exists update timestamp else create file
+    //struct stat file_struct;
+
+}
+
+
+//Command: mkdir
+void cmd_mkdir(const vector<string> &args) {
+    
+}
