@@ -8,9 +8,12 @@
 #include <dirent.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 #include <cstring>
 #include <pwd.h>
 #include <limits.h>
+#include <fstream>
+#include <utime.h>
 
 using namespace std;
 
@@ -27,6 +30,9 @@ void cmd_environ();
 void cmd_help();
 void cmd_pause();
 void cmd_quit();
+void cmd_touch(const vector<string> &args);
+void cmd_mkdir(const vector<string> &args);
+void cmd_rm(const vector<string> &args);
 
 int main() {
     cout << "Welcome to Basic OS Shell (C++)" << endl;
@@ -80,6 +86,12 @@ void executeCommand(const vector<string> &args) {
         cmd_pause();
     } else if (command == "quit") {
         cmd_quit();
+    } else if (command == "touch") {
+        cmd_touch(args);
+    } else if (command == "mkdir") {
+        cmd_mkdir(args);
+    } else if (command == "rm") {
+        cmd_rm(args);
     } else {
         cout << "Unsupported command: " << command << endl;
     }
@@ -179,18 +191,57 @@ void cmd_mv(const vector<string> &args) {
 
 //Command: rm
 void cmd_rm(const vector<string> &args) {
-    
+    //check if file or directory
+    //if doesnt exist, error message
+    //if file remove file, if directory remove directory
+    const string target = args[1];
+    struct stat st;
+    if(stat(target.c_str(), &st) != 0){
+        cout << "File/directory '" << target << "' does not exist." << endl;
+    }else{
+        if (S_ISDIR(st.st_mode) != 0) {
+            //remove directory
+            //maybe empty out directory contents to allow use of rmdir()
+        } else {
+            //remove file
+            if(remove(target.c_str()) == 0){
+                cout << "Successfully removed file: " << target << endl;
+            }else{
+                cout << "Error removing file." << endl;
+            }
+        }
+    }
 }
 
 //Command: touch
 void cmd_touch(const vector<string> &args) {
     //if file exists update timestamp else create file
-    //struct stat file_struct;
-
+    const string filename = args[1];
+    
+    struct stat st;
+    if(stat(filename.c_str(), &st) == 0){
+    //might need more lines to properly update timestamps
+        utime(filename.c_str(), nullptr);
+        cout << filename << " already exists. Updating timestamps" << endl;
+    }else{
+        ofstream outfile(filename);
+        if(!outfile){
+            cout << "Error creating file." << endl;
+        }
+        outfile.close();
+        cout << "File created." << endl;
+    }
 }
 
 
 //Command: mkdir
 void cmd_mkdir(const vector<string> &args) {
-    
+    const string directoryName = args[1];
+    struct stat st;
+    if(stat(directoryName.c_str(), &st) == 0){
+        cout << "Directory " << directoryName << " already exists." << endl;
+    }else{
+        mkdir(directoryName.c_str(), 0700);
+        cout << "Directory created successfully." << endl;
+    }
 }
