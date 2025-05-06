@@ -14,6 +14,7 @@
 #include <limits.h>
 #include <fstream>
 #include <utime.h>
+#include <dirent.h>
 
 using namespace std;
 
@@ -191,9 +192,6 @@ void cmd_mv(const vector<string> &args) {
 
 //Command: rm
 void cmd_rm(const vector<string> &args) {
-    //check if file or directory
-    //if doesnt exist, error message
-    //if file remove file, if directory remove directory
     const string target = args[1];
     struct stat st;
     if(stat(target.c_str(), &st) != 0){
@@ -201,7 +199,21 @@ void cmd_rm(const vector<string> &args) {
     }else{
         if (S_ISDIR(st.st_mode) != 0) {
             //remove directory
-            //maybe empty out directory contents to allow use of rmdir()
+            DIR* directory = opendir(target.c_str());
+            struct dirent *entry;
+            while((entry = readdir(directory)) != nullptr){
+                if(!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, "..")){
+                    continue;
+                }
+                string path = target + "/" + entry->d_name;
+                cmd_rm({"rm", path});
+            }
+            closedir(directory);
+            if (rmdir(target.c_str()) == 0) {
+                cout << "Successfully removed directory: " << target << endl;
+            } else {
+                cout << "Error removing directory." << endl;
+            }
         } else {
             //remove file
             if(remove(target.c_str()) == 0){
