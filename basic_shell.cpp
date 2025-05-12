@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <string>
 #include <vector>
@@ -43,12 +42,14 @@ void cmd_mkdir(const vector<string> &args);
 void cmd_wc(const vector<string> &args);
 void cmd_chmod(const vector<string> &args);
 
+//Entry point
 int main() {
     cout << "Welcome to Basic OS Shell (C++)" << endl;
     shellLoop();
     return 0;
 }
 
+//Main loop
 void shellLoop() {
     string input;
     while (true) {
@@ -61,6 +62,7 @@ void shellLoop() {
     }
 }
 
+//Tokenize user input
 vector<string> tokenize(const string &input) {
     vector<string> tokens;
     istringstream stream(input);
@@ -71,6 +73,7 @@ vector<string> tokenize(const string &input) {
     return tokens;
 }
 
+//Command execution
 void executeCommand(const vector<string> &args) {
     string command = args[0];
 
@@ -97,17 +100,20 @@ void executeCommand(const vector<string> &args) {
     else cout << "Unsupported command: " << command << endl;
 }
 
+//Change directory
 void cmd_cd(const vector<string> &args) {
     const char *path = (args.size() > 1) ? args[1].c_str() : getenv("HOME");
     if (chdir(path) != 0) perror("cd failed");
 }
 
+//Print working directory
 void cmd_pwd() {
     char cwd[PATH_MAX];
     if (getcwd(cwd, sizeof(cwd)) != NULL) cout << cwd << endl;
     else perror("pwd error");
 }
 
+//List directory contents
 void cmd_dir(const vector<string> &args) {
     const char *path = (args.size() > 1) ? args[1].c_str() : ".";
     DIR *dir = opendir(path);
@@ -119,20 +125,24 @@ void cmd_dir(const vector<string> &args) {
     } else perror("dir error");
 }
 
+//Clear screen
 void cmd_clr() {
     cout << "\033[2J\033[1;1H";
 }
 
+//Print args to output
 void cmd_echo(const vector<string> &args) {
     for (size_t i = 1; i < args.size(); ++i) cout << args[i] << " ";
     cout << endl;
 }
 
+//Display environment variables
 void cmd_environ() {
     extern char **environ;
     for (int i = 0; environ[i]; ++i) cout << environ[i] << endl;
 }
 
+//Help info
 void cmd_help() {
     cout << "Basic OS Shell Help:\n"
          << "- cd [dir]       : Change directory\n"
@@ -144,23 +154,31 @@ void cmd_help() {
          << "- help           : Show help\n"
          << "- pause          : Wait for user to press Enter\n"
          << "- quit           : Exit the shell\n"
-         << "- cp src dest    : Copy file from src to dest\n"
-         << "- mv src dest    : Move file from src to dest\n"
-         << "- grep pattern file : Search pattern in file\n"
-         << "- chmod user file : \n"
-         << "- chown user file : Change ownership of file\n";
+         << "- cp [src] [dest]    : Copy file from src to dest\n"
+         << "- mv [src] [dest]    : Move file from src to dest\n"
+         << "- grep [pattern] [file] : Search pattern in file\n"
+         << "- chown [user] [file] : Change ownership of file\n"
+         << "- cat [file]     : Display contents of a file\n"
+         << "- rm [file/dir]  : Remove a file or directory\n"
+         << "- touch [file]   : Create a file or update its timestamp\n"
+         << "- mkdir [dir]    : Create a new directory\n"
+         << "- wc -l|-w|-c [file]   : Count lines (-l), words (-w), or characters (-c) in a file\n"
+         << "- chmod <perm> [file]  : Change file permissions (e.g., 755)\n";
 }
 
+//Pause shell
 void cmd_pause() {
     cout << "Press Enter to continue..." << endl;
     cin.ignore();
 }
 
+//Exit shell
 void cmd_quit() {
     cout << "Exiting Basic OS Shell..." << endl;
     exit(0);
 }
 
+//Copy file from source to destination
 void cmd_cp(const vector<string> &args) {
     if (args.size() < 3) {
         cerr << "Usage: cp <source> <destination>" << endl;
@@ -172,6 +190,7 @@ void cmd_cp(const vector<string> &args) {
     cout << "File copied successfully." << endl;
 }
 
+//Move or rename a file
 void cmd_mv(const vector<string> &args) {
     if (args.size() < 3) {
         cerr << "Usage: mv <source> <destination>" << endl;
@@ -181,6 +200,7 @@ void cmd_mv(const vector<string> &args) {
     else cout << "File moved successfully." << endl;
 }
 
+//Search for pattern in a file
 void cmd_grep(const vector<string> &args) {
     if (args.size() < 3) {
         cerr << "Usage: grep <pattern> <file>" << endl;
@@ -193,6 +213,7 @@ void cmd_grep(const vector<string> &args) {
     }
 }
 
+//Change file ownership
 void cmd_chown(const vector<string> &args) {
     if (args.size() < 3) {
         cerr << "Usage: chown <user> <file>" << endl;
@@ -207,6 +228,7 @@ void cmd_chown(const vector<string> &args) {
     else cout << "Ownership changed successfully." << endl;
 }
 
+//Print file contents
 void cmd_cat(const vector<string> &args){
     const string filename = args[1];
     char ch;
@@ -225,7 +247,7 @@ void cmd_cat(const vector<string> &args){
 
 }
 
-//Command: rm
+//Remove file or directory
 void cmd_rm(const vector<string> &args) {
     const string target = args[1];
     struct stat st;
@@ -260,14 +282,13 @@ void cmd_rm(const vector<string> &args) {
     }
 }
 
-//Command: touch
+//Create file or update timestamps
 void cmd_touch(const vector<string> &args) {
     //if file exists update timestamp else create file
     const string filename = args[1];
     
     struct stat st;
     if(stat(filename.c_str(), &st) == 0){
-    //might need more lines to properly update timestamps
         utime(filename.c_str(), nullptr);
         cout << "'"<< filename << "' already exists. Updating timestamps" << endl;
     }else{
@@ -280,7 +301,7 @@ void cmd_touch(const vector<string> &args) {
     }
 }
 
-//Command: mkdir
+//Create directory
 void cmd_mkdir(const vector<string> &args) {
     const string directoryName = args[1];
     struct stat st;
@@ -292,52 +313,52 @@ void cmd_mkdir(const vector<string> &args) {
     }
 }
 
+//Word count
 void cmd_wc (const vector<string> &args) {
+    if (args.size() != 3) {
+        cout << "Error: enter three arguments. " << endl;
+        return;
+    }
     const string option = args[1];
     const string fileName = args[2];
     char fileChars;
     FILE *file;
-    int lines = 0, words = 0, chars = 0;
+    int lines = 1, words = 0, chars = 0;
 
-    if (args.size() != 3) { //move this above option and filename declaractions
-        cout << "Error: enter three arguments. " << endl;
-    } else {
-        file = fopen(fileName.c_str(), "r");
-        if (file == nullptr) {
-            cout << "Error opening file." << endl;
-        }
-        if (option == "-l") { //count lines
-            while ((fileChars=getc(file)) != EOF) {
-                if (fileChars == '\n') {
-                    lines++;
-                }
-            }
-            cout << "File '" << fileName << "' contains " << lines << " lines" << endl;
-        } else if (option == "-w") { //count words
-            bool inWord = false;
-            while ((fileChars=getc(file)) != EOF) {
-                if (isspace(fileChars)) {
-                    inWord = false;
-                } else if (!inWord) {
-                    words++;
-                    inWord = true;
-                }
-            }
-            cout << "File '" << fileName << "' contains " << words << " words" << endl;
-        } else if (option == "-c") { //count characters
-            while ((fileChars=getc(file)) != EOF) {
-                if (fileChars != '\n' || fileChars != ' ') {
-                    chars++;
-                }
-            }
-            cout << "File '" << fileName << "' contains " << chars << " characters" << endl;
-        }
-        fclose(file);
+    file = fopen(fileName.c_str(), "r");
+    if (file == nullptr) {
+        cout << "Error opening file." << endl;
     }
-
+    if (option == "-l") { //count lines
+        while ((fileChars=getc(file)) != EOF) {
+            if (fileChars == '\n') {
+                lines++;
+            }
+        }
+        cout << "File '" << fileName << "' contains " << lines << " lines" << endl;
+    } else if (option == "-w") { //count words
+        bool inWord = false;
+        while ((fileChars=getc(file)) != EOF) {
+            if (isspace(fileChars)) {
+                inWord = false;
+            } else if (!inWord) {
+                words++;
+                inWord = true;
+            }
+        }
+        cout << "File '" << fileName << "' contains " << words << " words" << endl;
+    } else if (option == "-c") { //count characters
+        while ((fileChars=getc(file)) != EOF) {
+            if (fileChars != '\n' || fileChars != ' ') {
+                chars++;
+            }
+        }
+        cout << "File '" << fileName << "' contains " << chars << " characters" << endl;
+    }
+    fclose(file);
 }
 
-//chmod <permission> <filename>
+//Change file permissions
 void cmd_chmod (const vector<string> &args) {
     if (args.size() != 3) {
         cout << "Error! Incorrect number of arguments." << endl;
