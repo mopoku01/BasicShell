@@ -55,7 +55,7 @@ osh> quit
 Collaborators
 
 - Michael Opoku
-- Elise Dzimeyor
+- Elisee Dzimeyor
 
 Project Info
 
